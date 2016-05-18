@@ -38,6 +38,9 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
     @Override
     public CrosswalkWebView createViewInstance (ThemedReactContext context) {
         return new CrosswalkWebView(context, activity);
+    @ReactProp(name = "injectedJavaScript")
+    public void setInjectedJavaScript(XWalkView view, @Nullable String injectedJavaScript) {
+        ((CrosswalkWebView) view).setInjectedJavaScript(injectedJavaScript);
     }
 
     @ReactProp(name = "url")
