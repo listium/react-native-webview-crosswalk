@@ -10,9 +10,12 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
+
 import org.xwalk.core.XWalkNavigationHistory;
 import org.xwalk.core.XWalkResourceClient;
 import org.xwalk.core.XWalkView;
+
+import javax.annotation.Nullable;
 
 class CrosswalkWebView extends XWalkView implements LifecycleEventListener {
 
@@ -28,6 +31,8 @@ class CrosswalkWebView extends XWalkView implements LifecycleEventListener {
 
     public CrosswalkWebView (ReactContext reactContext, Activity _activity) {
         super(reactContext, _activity);
+
+        this.addJavascriptInterface(new JavascriptBridge(reactContext), "CrosswalkWebViewBridgeAndroid");
 
         activity = _activity;
         eventDispatcher = reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher();
@@ -57,6 +62,8 @@ class CrosswalkWebView extends XWalkView implements LifecycleEventListener {
         if (isJSinjected) return;
         isJSinjected = true;
 
+        // For Bridge
+        this.evaluateJavascript("window.CrosswalkWebViewBridge = { send: function(message) { CrosswalkWebViewBridgeAndroid.send(message); }, onMessage: function() {} }; CrosswalkWebViewBridge = window.CrosswalkWebViewBridge; WebViewBridge = CrosswalkWebViewBridge; window.WebViewBridge = WebViewBridge;", null);
 
         if (    injectedJS != null &&
                 !TextUtils.isEmpty(injectedJS)) {

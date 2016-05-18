@@ -1,17 +1,20 @@
 package com.jordansexton.react.crosswalk.webview;
 
 import android.app.Activity;
+
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.common.annotations.VisibleForTesting;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+
 import org.xwalk.core.XWalkNavigationHistory;
 import org.xwalk.core.XWalkView;
 
-import javax.annotation.Nullable;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebView> {
 
@@ -20,6 +23,8 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
     public static final int GO_FORWARD = 2;
 
     public static final int RELOAD = 3;
+
+    public static final int SEND_TO_BRIDGE = 4;
 
     @VisibleForTesting
     public static final String REACT_CLASS = "CrosswalkWebView";
@@ -69,7 +74,8 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
         return MapBuilder.of(
             "goBack", GO_BACK,
             "goForward", GO_FORWARD,
-            "reload", RELOAD
+            "reload", RELOAD,
+            "sendToBridge", SEND_TO_BRIDGE
         );
     }
 
@@ -84,6 +90,8 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
                 break;
             case RELOAD:
                 view.reload(XWalkView.RELOAD_NORMAL);
+            case SEND_TO_BRIDGE:
+                sendToBridge(view, args.getString(0));
                 break;
         }
     }
@@ -94,5 +102,10 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
             NavigationStateChangeEvent.EVENT_NAME,
             MapBuilder.of("registrationName", "onNavigationStateChange")
         );
+    }
+
+    private void sendToBridge(CrosswalkWebView view, String message) {
+        String script = "window.CrosswalkWebViewBridge.onMessage('" + message + "');";
+        view.evaluateJavascript(script, null);
     }
 }
