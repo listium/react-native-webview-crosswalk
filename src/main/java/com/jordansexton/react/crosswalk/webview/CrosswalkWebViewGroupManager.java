@@ -108,4 +108,11 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
         String script = "window.CrosswalkWebViewBridge.onMessage('" + message + "');";
         view.evaluateJavascript(script, null);
     }
+
+    @Override
+    public void onDropViewInstance(CrosswalkWebView view) {
+        super.onDropViewInstance(view);
+        ((ThemedReactContext) view.getContext()).removeLifecycleEventListener((CrosswalkWebView) view);
+        view.onDestroy();
+    }
 }
