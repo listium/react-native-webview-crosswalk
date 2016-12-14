@@ -1,7 +1,7 @@
 'use strict';
 
-import React, { requireNativeComponent, DeviceEventEmitter, PropTypes, View } from 'react-native';
-import ReactNative, { requireNativeComponent, View } from 'react-native';
+import React, { PropTypes } from 'react';
+import ReactNative, { requireNativeComponent, View, DeviceEventEmitter } from 'react-native';
 
 var {
     addons: { PureRenderMixin },
@@ -30,7 +30,6 @@ var CrosswalkWebView = React.createClass({
             PropTypes.number,           // used internally by React packager
         ]),
         url:                     PropTypes.string,
-        injectedJavaScript:      PropTypes.string,
         onBridgeMessage:         PropTypes.func,
         ...View.propTypes
     },
@@ -40,30 +39,29 @@ var CrosswalkWebView = React.createClass({
         };
     },
     componentWillMount: function() {
-        DeviceEventEmitter.addListener("crosswalkWebViewBridgeMessage", (body) => {
-            console.log(body);
-            const { onBridgeMessage } = this.props;
-            const message = body.message;
-            if (onBridgeMessage) {
-                onBridgeMessage(message);
-            }
-        });
-    },
+         DeviceEventEmitter.addListener("crosswalkWebViewBridgeMessage", (body) => {
+             console.log(body);
+             const { onBridgeMessage } = this.props;
+             const message = body.message;
+             if (onBridgeMessage) {
+                 onBridgeMessage(message);
+             }
+         });
+     },
     render () {
         var source = this.props.source || {};
         if (this.props.url) {
             source.uri = this.props.url;
         }
         var nativeProps = Object.assign({}, this.props, {
- +            onCrosswalkWebViewNavigationStateChange: this.onNavigationStateChange,
- +            onCrosswalkWebViewError: this.onError
- +        });
+          onCrosswalkWebViewNavigationStateChange: this.onNavigationStateChange,
+          onCrosswalkWebViewError: this.onError
+        });
         return (
             <NativeCrosswalkWebView
                 { ...nativeProps }
                 ref={ WEBVIEW_REF }
-                source={ resolveAssetSource(source) }
- +            />
+                source={ resolveAssetSource(source) }/>
         );
     },
     getWebViewHandle () {
@@ -102,13 +100,13 @@ var CrosswalkWebView = React.createClass({
             null
         );
     },
-    sendToBridge (message: string) {
-        UIManager.dispatchViewManagerCommand(
-            this.getWebViewHandle(),
-            UIManager.CrosswalkWebView.Commands.sendToBridge,
-            [message]
-        );
-    },
+     sendToBridge (message: string) {
+         UIManager.dispatchViewManagerCommand(
+             this.getWebViewHandle(),
+             UIManager.CrosswalkWebView.Commands.sendToBridge,
+             [message]
+         );
+     }
 });
 
 var NativeCrosswalkWebView = requireNativeComponent('CrosswalkWebView', CrosswalkWebView);
