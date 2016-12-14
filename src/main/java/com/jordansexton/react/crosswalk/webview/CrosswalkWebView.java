@@ -11,6 +11,7 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
+
 import org.xwalk.core.XWalkNavigationHistory;
 import org.xwalk.core.XWalkResourceClient;
 import org.xwalk.core.XWalkUIClient;
@@ -32,8 +33,14 @@ class CrosswalkWebView extends XWalkView implements LifecycleEventListener {
     private boolean isJavaScriptInjected;
     private boolean isChoosingFile;
 
+    private @Nullable String injectedJS;
+
+    private boolean isJSinjected;
+
     public CrosswalkWebView (ReactContext reactContext, Activity _activity) {
         super(reactContext, _activity);
+
+        this.addJavascriptInterface(new JavascriptBridge(reactContext), "CrosswalkWebViewBridgeAndroid");
 
         activity = _activity;
         eventDispatcher = reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher();
@@ -50,6 +57,28 @@ class CrosswalkWebView extends XWalkView implements LifecycleEventListener {
 
     public void setLocalhost (Boolean localhost) {
         resourceClient.setLocalhost(localhost);
+    }
+
+    public void load(String url, String content) {
+        isJSinjected = false;
+        super.load(url, content);
+    }
+
+    public void setInjectedJavaScript(@Nullable String js) {
+        injectedJS = js;
+    }
+
+    public void callInjectedJavaScript() {
+        if (isJSinjected) return;
+        isJSinjected = true;
+
+        // For Bridge
+        this.evaluateJavascript("window.CrosswalkWebViewBridge = { send: function(message) { CrosswalkWebViewBridgeAndroid.send(message); }, onMessage: function() {} }; CrosswalkWebViewBridge = window.CrosswalkWebViewBridge; WebViewBridge = CrosswalkWebViewBridge; window.WebViewBridge = WebViewBridge;", null);
+
+        if (    injectedJS != null &&
+                !TextUtils.isEmpty(injectedJS)) {
+            this.evaluateJavascript(injectedJS, null);
+        }
     }
 
     @Override
