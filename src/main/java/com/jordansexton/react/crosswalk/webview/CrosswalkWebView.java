@@ -108,26 +108,6 @@ class CrosswalkWebView extends XWalkView implements LifecycleEventListener {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void load (String url, String content) {
-        isJavaScriptInjected = false;
-        isChoosingFile = false;
-        super.load(url, content);
-    }
-
-    public void setInjectedJavaScript(@Nullable String js) {
-        injectedJavaScript = js;
-    }
-
-    public void callInjectedJavaScript() {
-        if (!isJavaScriptInjected) {
-            isJavaScriptInjected = true;
-        }
-
-        if (injectedJavaScript != null && !TextUtils.isEmpty(injectedJavaScript)) {
-            this.evaluateJavascript(injectedJavaScript, null);
-        }
-    }
-
     protected class ResourceClient extends XWalkResourceClient {
 
         private Boolean localhost = false;

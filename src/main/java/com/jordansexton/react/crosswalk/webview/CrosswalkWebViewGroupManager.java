@@ -12,13 +12,11 @@ import com.facebook.react.common.annotations.VisibleForTesting;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-
 import org.xwalk.core.XWalkNavigationHistory;
 import org.xwalk.core.XWalkView;
 
-import java.util.Map;
-
 import javax.annotation.Nullable;
+import java.util.Map;
 
 public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebView> {
 
@@ -95,9 +93,7 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
 
     @ReactProp(name = "injectedJavaScript")
     public void setInjectedJavaScript (XWalkView view, @Nullable String injectedJavaScript) {
-        CrosswalkWebView crosswalkWebView = new CrosswalkWebView(context, activity);
-        context.addLifecycleEventListener(crosswalkWebView);
-        return crosswalkWebView;
+        ((CrosswalkWebView) view).setInjectedJavaScript(injectedJavaScript);
     }
 
     @ReactProp(name = "url")
@@ -141,6 +137,7 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
                 break;
             case RELOAD:
                 view.reload(XWalkView.RELOAD_NORMAL);
+                break;
             case SEND_TO_BRIDGE:
                 sendToBridge(view, args.getString(0));
                 break;
@@ -173,15 +170,9 @@ public class CrosswalkWebViewGroupManager extends ViewGroupManager<CrosswalkWebV
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             crosswalkWebView.onActivityResult(requestCode, resultCode, data);
         }
+    }
     private void sendToBridge(CrosswalkWebView view, String message) {
-        String script = "window.CrosswalkWebViewBridge.onMessage('" + message + "');";
-        view.evaluateJavascript(script, null);
-    }
-
-    @Override
-    public void onDropViewInstance(CrosswalkWebView view) {
-        super.onDropViewInstance(view);
-        ((ThemedReactContext) view.getContext()).removeLifecycleEventListener((CrosswalkWebView) view);
-        view.onDestroy();
-    }
+         String script = "window.CrosswalkWebViewBridge.onMessage('" + message + "');";
+         view.evaluateJavascript(script, null);
+     }
 }
